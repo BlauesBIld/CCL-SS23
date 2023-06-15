@@ -2,9 +2,21 @@ const express = require('express');
 const WebSocket = require('ws');
 const app = express();
 const { spawn } = require('child_process');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+
+const indexRouter = require('./routes/index');
+const path = require("path");
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 // Serve the public directory as static files
 app.use(express.static('public'));
+
+app.use(cookieParser());
+app.use(cors());
+app.use('/', indexRouter);
 
 // Create a WebSocket server
 const wss = new WebSocket.Server({ port: 25056 });
@@ -34,5 +46,5 @@ wss.on('connection', (ws) => {
 
 // Start the server
 app.listen(3000, () => {
-    console.log('Server listening on port 3000');
+    console.log('Server listening on port http://localhost:3000');
 });

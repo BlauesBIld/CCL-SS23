@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chessboard.js Example</title>
+    <title>DeChess</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
-
     <style>
         #board {
             width: 800px;
@@ -20,12 +19,26 @@
 <body class="bg-dark">
 <div class="container">
     <div class="row">
-        <div class="col-md-8 mx-auto mt-4">
-            <div id="board"></div>
-            <div class="text-center">
-                <a href="#" id="restartbtn" class="btn btn-lg btn-danger">Restart</a>
+        <div class="col-md-2">
+            <div class="row text-start">
+                <a class="btn btn-primary mt-4" href="/login">Login</a>
+            </div>
+            <div class="row">
+                <ul></ul>
             </div>
         </div>
+        <div class="col-md-8 mx-auto mt-4">
+            <div class="row">
+                <h1 class="display-2 text-white text-center">DeChess</h1>
+            </div>
+            <div class="row">
+                <div id="board" class="mx-auto"></div>
+                <div class="text-center">
+                    <a href="#" id="restartbtn" class="btn btn-lg btn-danger">Restart</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
     </div>
 </div>
 <script>
