@@ -3,7 +3,11 @@
 <head>
     <title>DeChess</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -11,34 +15,43 @@
           integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
     <style>
         #board {
-            width: 800px;
-            height: 800px;
+            width: 700px;
+            height: 700px;
         }
     </style>
 </head>
 <body class="bg-dark">
-<div class="container">
-    <div class="row">
-        <div class="col-md-2">
+<div class="row mx-4">
+    <div class="col-md-2">
+        <% if (loggedInUser.id !== -1) { %>
             <div class="row text-start">
-                <a class="btn btn-primary mt-4" href="/login">Login</a>
+                <p class="text-white mt-4">Logged in as <%= loggedInUser.username %></p>
+            </div>
+        <% } else { %>
+            <div class="row text-start">
+                <a class="btn btn-primary mt-4 w-50" href="/login">Login</a>
             </div>
             <div class="row">
-                <ul></ul>
+                <p class="text-white mt-4">Logged in as Guest</p>
+            </div>
+        <% } %>
+        <div class="row">
+            <ul></ul>
+        </div>
+    </div>
+    <div class="col-md-8 mx-auto mt-4">
+        <div class="row">
+            <h1 class="display-2 text-white text-center">DeChess</h1>
+        </div>
+        <div class="row">
+            <div id="board" class="mx-auto"></div>
+            <div class="text-center">
+                <a href="#" id="restartbtn" class="btn btn-lg btn-danger">Restart</a>
             </div>
         </div>
-        <div class="col-md-8 mx-auto mt-4">
-            <div class="row">
-                <h1 class="display-2 text-white text-center">DeChess</h1>
-            </div>
-            <div class="row">
-                <div id="board" class="mx-auto"></div>
-                <div class="text-center">
-                    <a href="#" id="restartbtn" class="btn btn-lg btn-danger">Restart</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2"></div>
+    </div>
+    <div class="col-md-2">
+
     </div>
 </div>
 <script>
@@ -137,7 +150,7 @@
     board = Chessboard('board', config)
 
     // Create a new WebSocket connection
-    var ws = new WebSocket('ws://localhost:8080');
+    var ws = new WebSocket('ws://localhost:25056');
 
     // Handle WebSocket errors
     ws.onerror = function (event) {

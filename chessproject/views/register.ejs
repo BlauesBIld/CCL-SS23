@@ -12,8 +12,12 @@
     <div class="container">
         <div class="row justify-content-center text-center">
             <div class="col-md-5">
-                <h1>Login</h1>
-                <form method="POST" action="/login">
+                <h1>Register</h1>
+                <form method="POST" action="/register">
+                    <div class="row py-2">
+                        <label for="username">Username:</label><br>
+                        <input type="text" id="username" name="username" required>
+                    </div>
                     <div class="row py-2">
                         <label for="email">Email:</label><br>
                         <input type="text" id="email" name="email" required>
@@ -22,9 +26,9 @@
                         <label for="password">Password:</label><br>
                         <input type="password" id="password" name="password" required>
                     </div>
-                    <button class="btn btn-success" type="submit">Login</button>
+                    <button class="btn btn-success" type="submit">Register</button>
                 </form>
-                <p class="pt-3">Don't have an account? <a href="/register">Register</a></p>
+                <p class="pt-3">Already have an account? <a href="/login">Login</a></p>
             </div>
         </div>
     </div>
