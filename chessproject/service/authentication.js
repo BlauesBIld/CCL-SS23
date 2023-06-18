@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const userModel = require("../model/userModel");
+const userController = require("../controller/userController");
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 async function checkPassword(password, hash) {
@@ -22,22 +23,33 @@ async function authenticateUser({email, password}, users, res) {
     }
 }
 
+function createGuestUserAndContinue(req, res, next) {
+    req.user = {id: -1, username: userController.generateUniqueGuestName()};
+    console.log(req.user);
+    const accessToken = jwt.sign({id: req.user.id, name: req.user.name}, ACCESS_TOKEN_SECRET, {expiresIn: '24h'});
+    res.cookie('accessToken', accessToken);
+    next();
+}
+
 function authenticateJWTAndContinueWithGuest(req, res, next) {
     const token = req.cookies['accessToken'];
     if (token) {
         jwt.verify(token, ACCESS_TOKEN_SECRET, (err, userJWT) => {
             if (err) {
-                const message = 'There was an error with your session. Please log in again.';
-                res.render('login', {message: message});
+                createGuestUserAndContinue(req, res, next);
+            } else {
+                userModel.getUserById(userJWT.id).then((user) => {
+                    if(user === undefined) {
+                        createGuestUserAndContinue(req, res, next);
+                    } else {
+                        req.user = user;
+                        next();
+                    }
+                });
             }
-            userModel.getUserById(userJWT.id).then((user) => {
-                req.user = user;
-                next();
-            });
         });
     } else {
-        req.user = {id: -1, username: 'Guest'};
-        next();
+        createGuestUserAndContinue(req, res, next);
     }
 }
 

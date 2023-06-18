@@ -3,16 +3,14 @@
 <head>
     <title>DeChess</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
     <style>
         #board {
             width: 700px;
@@ -21,45 +19,94 @@
     </style>
 </head>
 <body class="bg-dark">
-<div class="row mx-4">
-    <div class="col-md-2">
-        <% if (loggedInUser.id !== -1) { %>
-            <div class="row text-start">
-                <p class="text-white mt-4">Logged in as <%= loggedInUser.username %></p>
+<div class="container-fluid">
+    <div class="row mx-4">
+        <div class="col-md-2">
+            <% if (loggedInUser.id !== -1) { %>
+                <div class="row text-start">
+                    <div class="d-flex mt-4">
+                        <div>
+                            <button class="btn btn-primary me-3" type="button" data-bs-toggle="offcanvas"
+                                    data-bs-target="#profileMenu" aria-controls="profileMenu">
+                                <img class="m-1" src="/img/user.png" alt="User Image" width="38" height="38">
+                            </button>
+                        </div>
+                        <div>
+                            <p class="text-white text-center mb-0">Logged in as: </p>
+                            <p><strong class="text-warning fs-4"><%= loggedInUser.username %></strong></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="offcanvas offcanvas-start bg-dark border-end" tabindex="-1" id="profileMenu"
+                     aria-labelledby="profileMenuLabel" data-bs-backdrop="false">
+                    <div class="offcanvas-header bg-dark">
+                        <h5 class="offcanvas-title text-white" id="profileMenuLabel">Profile Menu</h5>
+                        <button type="button" class="btn-close-white" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body bg-dark">
+                        <ul class="list-group bg-dark">
+                            <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Edit
+                                    Profile</a></li>
+                            <li class="list-group-item bg-dark"><a href="#"
+                                                                   class="btn btn-dark w-100 text-start">Friends</a>
+                            </li>
+                            <li class="list-group-item bg-dark"><a href="#"
+                                                                   class="btn btn-dark w-100 text-start">Clubs</a>
+                            </li>
+                            <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Achievements</a>
+                            </li>
+                            <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Rating/Statistics</a>
+                            </li>
+                            <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Friends
+                                    Requests</a></li>
+                            <div class="mt-5">
+                                <a href="/logout" class="btn btn-danger w-100 text-center text-white">Logout</a>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="row text-start">
+                    <a class="btn btn-primary mt-4 w-50" href="/login">Login</a>
+                </div>
+                <div class="row">
+                    <div>
+                        <p class="text-white text-center mb-0">Logged in as: </p>
+                        <p><strong class="text-warning fs-4"><%= loggedInUser.username %></strong></p>
+                    </div>
+                </div>
+            <% } %>
+            <div class="row">
+                <ul></ul>
             </div>
-        <% } else { %>
-            <div class="row text-start">
-                <a class="btn btn-primary mt-4 w-50" href="/login">Login</a>
+        </div>
+        <div class="col-md-8 mx-auto mt-4">
+            <div class="row">
+                <h1 class="display-2 text-white text-center mb-4">DeChess</h1>
             </div>
             <div class="row">
-                <p class="text-white mt-4">Logged in as Guest</p>
-            </div>
-        <% } %>
-        <div class="row">
-            <ul></ul>
-        </div>
-    </div>
-    <div class="col-md-8 mx-auto mt-4">
-        <div class="row">
-            <h1 class="display-2 text-white text-center">DeChess</h1>
-        </div>
-        <div class="row">
-            <div id="board" class="mx-auto"></div>
-            <div class="text-center">
-                <a href="#" id="restartbtn" class="btn btn-lg btn-danger">Restart</a>
+                <div id="board" class="mx-auto"></div>
+                <div id="MiddleAbsoluteWindow"
+                     class="position-absolute top-50 start-50 translate-middle text-center pb-3">
+                    <a href="#" class="btn btn-lg btn-primary fs-3 mt-2 HomeScreenButton">Play vs AI</a><br>
+                    <a href="#" class="btn btn-lg btn-primary fs-1 mt-2 HomeScreenButton" onclick="queueUp()">Play vs
+                        Player</a><br>
+                    <a href="#" class="btn btn-primary mt-2 HomeScreenButton">Create Custom Game</a><br>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-2">
-
+        <div class="col-md-2"></div>
     </div>
 </div>
 <script>
     // Create a new board
-    var board = null
-    var game = new Chess()
-    var whiteSquareGrey = '#a9a9a9'
-    var blackSquareGrey = '#696969'
+    let board = null
+    let game = new Chess()
+    let whiteSquareGrey = '#a9a9a9'
+    let blackSquareGrey = '#696969'
+    let playerColor = '';
+    let opponentName = '';
 
     function removeGreySquares() {
         $('#myBoard .square-55d63').css('background', '')
@@ -77,32 +124,39 @@
     }
 
     function onDragStart(source, piece) {
-        // do not pick up pieces if the game is over
-        if (game.game_over()) return false
+        // Do not pick up pieces if the game is over
+        if (game.game_over()) return false;
 
-        // or if it's not that side's turn
-        if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-            (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-            return false
+        // Check if it is the player's turn
+        if ((game.turn() === 'w' && playerColor !== 'white') ||
+            (game.turn() === 'b' && playerColor !== 'black')) {
+            return false;
+        }
+
+        // Check if the piece being moved belongs to the player
+        if (piece.charAt(0) !== game.turn()) {
+            return false;
         }
     }
 
     function onDrop(source, target) {
         removeGreySquares()
 
-        // see if the move is legal
         var move = game.move({
             from: source,
             to: target,
-            promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            promotion: 'q'
         })
 
-        // illegal move
         if (move === null) {
             return 'snapback'
         } else {
-            // Send the new board to the server
-            ws.send(game.fen());
+            console.log("sent new Fen String: " + game.fen());
+            ws.send(JSON.stringify({
+                type: 'move',
+                newBoard: game.fen(),
+                opponent: opponentName
+            }));
         }
 
         const moves = game.moves();
@@ -139,7 +193,7 @@
 
     var config = {
         draggable: true,
-        position: 'start',
+        position: '',
         onDragStart: onDragStart,
         onDrop: onDrop,
         onMouseoutSquare: onMouseoutSquare,
@@ -150,27 +204,69 @@
     board = Chessboard('board', config)
 
     // Create a new WebSocket connection
-    var ws = new WebSocket('ws://localhost:25056');
+    let ws = new WebSocket('ws://localhost:25056');
 
     // Handle WebSocket errors
     ws.onerror = function (event) {
         console.error('WebSocket error:', event);
     };
 
+    ws.onopen = function () {
+        console.log('websocket is connected ...')
+        ws.send(JSON.stringify({
+            type: 'init',
+            username: <%- JSON.stringify(loggedInUser.username) %>
+        }));
+    }
+
     ws.onmessage = function (event) {
         console.log(`${event.data}`);
-        let move = `${event.data}`;
-        console.log('Received move:', move);
-        let from = move.substring(0, 2);
-        let to = move.substring(2, 4);
-        game.move({from: from, to: to});
-        board.position(game.fen());
+        let message = JSON.parse(event.data);
+        if (message.type === 'startGame') {
+            console.log('Starting game...');
+            playerColor = message.color;
+            opponentName = message.opponent;
+            console.log('Player color:', playerColor);
+
+            board.position('start');
+            if (playerColor === 'black') {
+                board.flip();
+            }
+
+            document.querySelector('#MiddleAbsoluteWindow').innerHTML = '';
+        } else if (message.type === 'move') {
+            let newFen = message.newBoard;
+            console.log('Received new FEN string:', newFen);
+            game.load(newFen);
+            board.position(game.fen());
+        }
     };
 
-    $('#restartbtn').click(function () {
-        board.start();
-        game.reset();
-    });
+    function queueUp() {
+        document.querySelector('.HomeScreenButton').style.display = 'none';
+        document.querySelector('#MiddleAbsoluteWindow').innerHTML = '<h2 class="text-white">Looking for Opponent...</h2>';
+        fetch('/queueup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: <%= JSON.stringify(loggedInUser.id) %>,
+                username: <%- JSON.stringify(loggedInUser.username) %>})
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network Error');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
 </script>
 </body>
 </html>

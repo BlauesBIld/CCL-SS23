@@ -15,7 +15,6 @@ router.route('/login')
     .post((req, res) => {
         userModel.getUsers()
             .then((users) => {
-                console.log(req.body)
                 authenticationService.authenticateUser(req.body, users, res)
             })
             .catch((err) => {
@@ -30,5 +29,14 @@ router.route('/register')
     .post((req, res) => {
         userController.registerUser(req, res);
     });
+
+router.get('/logout', (req, res, next) => {
+    res.clearCookie('accessToken');
+    res.redirect('/');
+});
+
+router.post('/queueup', (req, res) => {
+    userController.queueUp(req, res);
+});
 
 module.exports = router;
