@@ -68,12 +68,16 @@
                 </div>
             <% } else { %>
                 <div class="row text-start">
-                    <a class="btn btn-primary mt-4 w-50" href="/login">Login</a>
-                </div>
-                <div class="row">
-                    <div>
-                        <p class="text-white text-center mb-0">Logged in as: </p>
-                        <p><strong class="text-warning fs-4"><%= loggedInUser.username %></strong></p>
+                    <div class="d-flex mt-4">
+                        <div>
+                            <a class="btn btn-primary me-3" href="/login">
+                                <img class="m-1" src="/img/login.png" alt="User Image" width="38" height="38">
+                            </a>
+                        </div>
+                        <div>
+                            <p class="text-white text-center mb-0">Logged in as: </p>
+                            <p><strong class="text-warning fs-4"><%= loggedInUser.username %></strong></p>
+                        </div>
                     </div>
                 </div>
             <% } %>

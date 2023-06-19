@@ -3,6 +3,8 @@ const fs = require('fs')
 const bcrypt = require('bcrypt')
 require('body-parser');
 
+const chessDataModel = require("../model/chessDataModel");
+
 let getUsers = () => new Promise((resolve, reject) => {
     db.query('SELECT * FROM users', function (err, result, fields) {
         if (err) reject(err);
@@ -35,7 +37,8 @@ function createUserInDatabase(sql, values, reject, resolve, userData) {
         if (err) {
             reject(err)
         }
-        resolve(userData);
+        chessDataModel.createChessDataForNewUser(result.id);
+        resolve(result);
     });
 }
 

@@ -1,4 +1,5 @@
 const userModel = require('../model/userModel');
+const chessDataModel = require("../model/chessDataModel");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
@@ -104,7 +105,7 @@ function registerUser(req, res, next) {
         });
 }
 
-function startGame(player1Username, player2Username) {
+function startGuestGame(player1Username, player2Username) {
     let player1 = ws.getSocketByUsername(player1Username);
     let player2 = ws.getSocketByUsername(player2Username);
 
@@ -124,6 +125,23 @@ function startGame(player1Username, player2Username) {
     }
 }
 
+function startUserGame(player1Id, player2Id) {
+
+}
+
+function findUserNameInUserQueueWithSimilarRating(eloRating) {
+    let foundUsername;
+    let maxDifference = 100;
+    for (let i = 0; i < userQueue.length; i++) {
+        if(userQueue[i].username === req.body.username) {
+            continue;
+        }
+        if (Math.abs(userQueue[i].eloRating - eloRating) < maxDifference) {
+
+        }
+    }
+}
+
 function queueUp(req, res) {
     if (req.body.userId === -1) {
         if (guestQueue.length === 0) {
@@ -133,11 +151,27 @@ function queueUp(req, res) {
             let player1 = guestQueue.pop();
             let player2 = req.body.username;
             console.log("started game between " + player1 + " and " + player2);
-            startGame(player1, player2);
+            startGuestGame(player1, player2);
         }
     } else if (req.body.userId !== -1) {
         userModel.getUserById(req.body.userId).then((user) => {
-
+            chessDataModel.getChessDataByUserId(req.body.userId).then((chessData) => {
+                let foundUsername;
+                if ((foundUsername = findUserNameInUserQueueWithSimilarRating(chessData.elo))) {
+                    let player1 = foundUsername.username;
+                    let player2 = user.username;
+                    console.log("started game between " + player1 + " and " + player2);
+                    startGuestGame(player1, player2);
+                } else {
+                    let newQueueEntry = {
+                        username: user.username,
+                        eloRating: chessData.elo
+                    }
+                    userQueue.push(newQueueEntry);
+                    console.log("added " + req.body.username + " to user queue");
+                    console.log(newQueueEntry)
+                }
+            });
         });
     } else {
         res.sendStatus(500);
