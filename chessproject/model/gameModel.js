@@ -36,9 +36,28 @@ let getTopTenOngoingAverageEloRatingGames = () => new Promise((resolve, reject) 
     });
 });
 
+let getGameByPlayerUsername = (username) => new Promise((resolve, reject) => {
+    db.query('SELECT * FROM games WHERE player1_username = ? OR player2_username = ?', [username, username], function (err, result, fields) {
+        if (err) {
+            reject(err)
+        } else {
+            resolve(result[0]);
+        }
+    });
+});
+
+let endGame = (id, winnerUsername) => new Promise((resolve, reject) => {
+    db.query("UPDATE games SET status = ?, winner_username = ? WHERE id = ?", ["concluded", winnerUsername, id], function (err, result, fields) {
+        if (err) reject(err);
+        resolve(result);
+    });
+});
+
 module.exports = {
     getGames,
     getGameById,
     createGame,
-    getTopTenOngoingAverageEloRatingGames
+    getTopTenOngoingAverageEloRatingGames,
+    getGameByPlayerUsername,
+    endGame
 }

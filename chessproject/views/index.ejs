@@ -140,7 +140,8 @@
                 <div class="offcanvas-body bg-dark">
                     <h5 class="text-white">General</h5>
                     <ul class="list-group bg-dark">
-                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Play</a></li>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Play</a>
+                        </li>
                         <li class="list-group-item bg-dark"><a href="#"
                                                                class="btn btn-dark w-100 text-start">Learn</a>
                         </li>
@@ -154,16 +155,20 @@
                     </ul>
                     <h5 class="text-white mt-4">Settings</h5>
                     <ul class="list-group bg-dark">
-                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Account Settings</a></li>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Account
+                                Settings</a></li>
                         <li class="list-group-item bg-dark"><a href="#"
-                                                               class="btn btn-dark w-100 text-start">Notification Preferences</a>
+                                                               class="btn btn-dark w-100 text-start">Notification
+                                Preferences</a>
                         </li>
                         <li class="list-group-item bg-dark"><a href="#"
-                                                               class="btn btn-dark w-100 text-start">Appearance/Theme Options</a>
+                                                               class="btn btn-dark w-100 text-start">Appearance/Theme
+                                Options</a>
                         </li>
                         <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Sound</a>
                         </li>
-                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Privacy and Data Settings</a>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Privacy
+                                and Data Settings</a>
                         </li>
                     </ul>
                 </div>
@@ -224,16 +229,14 @@
             return 'snapback'
         } else {
             console.log("sent new Fen String: " + game.fen());
+            addNewMoveToTheList(move);
             ws.send(JSON.stringify({
                 type: 'move',
                 newBoard: game.fen(),
+                move: move,
                 opponent: opponentName
             }));
         }
-
-        const moves = game.moves();
-        const randomMove = moves[Math.floor(Math.random() * moves.length)];
-        console.log(randomMove);
     }
 
     function onMouseoverSquare(square, piece) {
@@ -291,6 +294,18 @@
         }));
     }
 
+    function addNewMoveToTheList(move) {
+        // Add new move to moves list
+        let movesList = document.querySelector('#moves');
+        let moveColor = move.color === 'w' ? 'White' : 'Black';
+        let moveSan = move.san;
+        let moveText = `${moveColor}: ${moveSan}`;
+        let moveItem = document.createElement('div');
+        moveItem.classList.add('py-1', 'px-2', 'border-bottom', 'text-center');
+        moveItem.textContent = moveText;
+        movesList.appendChild(moveItem);
+    }
+
     ws.onmessage = function (event) {
         console.log(`${event.data}`);
         let message = JSON.parse(event.data);
@@ -311,6 +326,8 @@
             console.log('Received new FEN string:', newFen);
             game.load(newFen);
             board.position(game.fen());
+
+            addNewMoveToTheList(message.move);
         }
     };
 

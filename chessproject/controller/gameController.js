@@ -16,6 +16,27 @@ function getTopTenOngoingAverageEloRatingGames() {
     });
 }
 
+function checkIfUserIsInAGameAndEndIt(username) {
+    return new Promise((resolve, reject) => {
+        gameModel.getGameByPlayerUsername(username).then((game) => {
+            if (game !== undefined) {
+                let winnerUsername = game.player1_username === username ? game.player2_username : game.player1_username;
+                gameModel.endGame(game.id, winnerUsername).then(() => {
+                    resolve();
+                }).catch((err) => {
+                    reject(err);
+                });
+            } else {
+                resolve();
+            }
+        }).catch((err) => {
+            reject(err);
+        });
+    });
+}
+
+
 module.exports = {
-    getTopTenOngoingAverageEloRatingGames
+    getTopTenOngoingAverageEloRatingGames,
+    checkIfUserIsInAGameAndEndIt
 }
