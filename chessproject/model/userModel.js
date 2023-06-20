@@ -37,7 +37,9 @@ function createUserInDatabase(sql, values, reject, resolve, userData) {
         if (err) {
             reject(err)
         }
-        chessDataModel.createChessDataForNewUser(result.id);
+        if (result) {
+            chessDataModel.createChessDataForNewUser(result.insertId);
+        }
         resolve(result);
     });
 }

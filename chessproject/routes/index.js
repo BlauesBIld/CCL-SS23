@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const userController = require("../controller/userController");
+const gameController = require("../controller/gameController");
 const userModel = require("../model/userModel");
 const authenticationService = require("../service/authentication");
 
 router.get('/', authenticationService.authenticateJWTAndContinueWithGuest, (req, res) => {
-    res.render('index', {loggedInUser: req.user});
+    gameController.getTopTenOngoingAverageEloRatingGames().then((games) => {
+        console.log(games);
+        res.render('index', {loggedInUser: req.user, games: games});
+    });
 });
 
 router.route('/login')
@@ -23,11 +27,11 @@ router.route('/login')
     });
 
 router.route('/register')
-    .get((req, res) => {
+    .get((req, res, next) => {
         res.render('register');
     })
-    .post((req, res) => {
-        userController.registerUser(req, res);
+    .post((req, res, next) => {
+        userController.registerUser(req, res, next);
     });
 
 router.get('/logout', (req, res, next) => {

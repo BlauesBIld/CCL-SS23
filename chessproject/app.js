@@ -22,6 +22,12 @@ app.use(cookieParser());
 app.use(cors());
 app.use('/', indexRouter);
 
+function errorHandler(err, req, res, next) {
+    console.log(err);
+    res.render('error', {error: err});
+}
+app.use(errorHandler); // Add errorHandler to the middleware stack
+
 app.listen(3000, () => {
     console.log('Server listening on port http://localhost:3000');
 });

@@ -1,3 +1,9 @@
+DROP TABLE IF EXISTS moves;
+DROP TABLE IF EXISTS chat_messages;
+DROP TABLE IF EXISTS chess_data;
+DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users (
   id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL UNIQUE,
@@ -8,14 +14,14 @@ CREATE TABLE users (
 
 CREATE TABLE games (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  player1_id INT NOT NULL,
-  player2_id INT NOT NULL,
+  player1_username VARCHAR(50) NOT NULL,
+  player2_username VARCHAR(50) NOT NULL,
   status ENUM('ongoing', 'completed') NOT NULL DEFAULT 'ongoing',
-  winner_id INT,
+  winner_username VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (player1_id) REFERENCES users(id),
-  FOREIGN KEY (player2_id) REFERENCES users(id),
-  FOREIGN KEY (winner_id) REFERENCES users(id)
+  FOREIGN KEY (player1_username) REFERENCES users(username),
+  FOREIGN KEY (player2_username) REFERENCES users(username),
+  FOREIGN KEY (winner_username) REFERENCES users(username)
 );
 
 CREATE TABLE moves (

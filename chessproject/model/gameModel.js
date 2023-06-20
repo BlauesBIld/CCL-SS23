@@ -20,8 +20,8 @@ let getGameById = (id) => new Promise((resolve, reject) => {
     });
 });
 
-let createGame = (gameData) => new Promise(async (resolve, reject) => {
-    db.query("INSERT INTO games (player1_id, player2_id) VALUES (?, ?)", [gameData.player1_id, gameData.player2_id], function (err, result, fields) {
+let createGame = (player1Username, player2Username, averageEloRatingBetweenPlayers) => new Promise(async (resolve, reject) => {
+    db.query("INSERT INTO games (player1_username, player2_username, average_elo_rating) VALUES (?, ?, ?)", [player1Username, player2Username, averageEloRatingBetweenPlayers], function (err, result, fields) {
         if (err) {
             reject(err)
         }
@@ -29,7 +29,16 @@ let createGame = (gameData) => new Promise(async (resolve, reject) => {
     });
 });
 
+let getTopTenOngoingAverageEloRatingGames = () => new Promise((resolve, reject) => {
+    db.query("SELECT * FROM games WHERE status = ? ORDER BY average_elo_rating DESC LIMIT 10", ["ongoing"], function (err, result, fields) {
+        if (err) reject(err);
+        resolve(result);
+    });
+});
+
 module.exports = {
     getGames,
-    getGameById
+    getGameById,
+    createGame,
+    getTopTenOngoingAverageEloRatingGames
 }

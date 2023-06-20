@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const ws = require("../service/websocket");
+const gameModel = require("../model/gameModel");
 
 let guestQueue = [];
 let userQueue = [];
@@ -125,51 +126,90 @@ function startGuestGame(player1Username, player2Username) {
     }
 }
 
-function startUserGame(player1Id, player2Id) {
-
+function removeAllUserQueuesEntriesWithUsernames(usernames) {
+    for (let i = 0; i < usernames.length; i++) {
+        for (let j = 0; j < userQueue.length; j++) {
+            if (userQueue[j].username === usernames[i]) {
+                userQueue.splice(j, 1);
+            }
+        }
+    }
 }
 
-function findUserNameInUserQueueWithSimilarRating(eloRating) {
+function startUserGame(player1QueueEntry, player2QueueEntry) {
+    console.log("Trying to get websockets from " + player1QueueEntry.username + " & " + player2QueueEntry.username);
+    let player1 = ws.getSocketByUsername(player1QueueEntry.username);
+    let player2 = ws.getSocketByUsername(player2QueueEntry.username);
+
+    console.log("hello " + player1);
+
+    if (player1 !== undefined && player2 !== undefined) {
+        removeAllUserQueuesEntriesWithUsernames([player1QueueEntry.username, player2QueueEntry.username]);
+        player1.send(JSON.stringify({
+            type: "startGame",
+            opponent: player2QueueEntry.username,
+            eloRating: player2QueueEntry.eloRating,
+            color: "white"
+        }));
+        player2.send(JSON.stringify({
+            type: "startGame",
+            opponent: player1QueueEntry.username,
+            eloRating: player1QueueEntry.eloRating,
+            color: "black"
+        }));
+
+        let averageEloRatingBetweenPlayers = (player1QueueEntry.eloRating + player2QueueEntry.eloRating) / 2;
+        gameModel.createGame(player1QueueEntry.username, player2QueueEntry.username, averageEloRatingBetweenPlayers);
+    } else {
+        console.log("one of the players is not connected");
+    }
+    console.log("current user queue:");
+    for (let i = 0; i < userQueue.length; i++) {
+        console.log(userQueue[i].username + " " + userQueue[i].eloRating);
+    }
+}
+
+function findUserNameInUserQueueWithSimilarRating(player1username, eloRating) {
     let foundUsername;
     let maxDifference = 100;
     for (let i = 0; i < userQueue.length; i++) {
-        if(userQueue[i].username === req.body.username) {
+        if (userQueue[i].username === player1username) {
             continue;
         }
         if (Math.abs(userQueue[i].eloRating - eloRating) < maxDifference) {
-
+            foundUsername = userQueue[i];
         }
     }
+    if(foundUsername) {
+        console.log("found user in queue: " + foundUsername.username)
+    }
+    return foundUsername;
 }
 
 function queueUp(req, res) {
     if (req.body.userId === -1) {
         if (guestQueue.length === 0) {
-            console.log("added " + req.body.username + " to guest queue");
             guestQueue.push(req.body.username);
         } else {
             let player1 = guestQueue.pop();
             let player2 = req.body.username;
-            console.log("started game between " + player1 + " and " + player2);
             startGuestGame(player1, player2);
         }
     } else if (req.body.userId !== -1) {
         userModel.getUserById(req.body.userId).then((user) => {
             chessDataModel.getChessDataByUserId(req.body.userId).then((chessData) => {
+                let newQueueEntry = {
+                    username: user.username,
+                    eloRating: chessData.elo
+                }
+                userQueue.push(newQueueEntry);
+                console.log(newQueueEntry);
+
                 let foundUsername;
-                if ((foundUsername = findUserNameInUserQueueWithSimilarRating(chessData.elo))) {
-                    let player1 = foundUsername.username;
-                    let player2 = user.username;
-                    console.log("started game between " + player1 + " and " + player2);
-                    startGuestGame(player1, player2);
-                } else {
-                    let newQueueEntry = {
-                        username: user.username,
-                        eloRating: chessData.elo
-                    }
-                    userQueue.push(newQueueEntry);
-                    console.log("added " + req.body.username + " to user queue");
-                    console.log(newQueueEntry)
+                if ((foundUsername = findUserNameInUserQueueWithSimilarRating(req.body.username, chessData.elo))) {
+                    let player1 = foundUsername;
+                    let player2 = {username: user.username, eloRating: chessData.elo};
+                    startUserGame(player1, player2);
                 }
             });
         });

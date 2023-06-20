@@ -21,7 +21,7 @@
 <body class="bg-dark">
 <div class="container-fluid">
     <div class="row mx-4">
-        <div class="col-md-2">
+        <div class="col-md-3">
             <% if (loggedInUser.id !== -1) { %>
                 <div class="row text-start">
                     <div class="d-flex mt-4">
@@ -40,7 +40,7 @@
                 <div class="offcanvas offcanvas-start bg-dark border-end" tabindex="-1" id="profileMenu"
                      aria-labelledby="profileMenuLabel" data-bs-backdrop="false">
                     <div class="offcanvas-header bg-dark">
-                        <h5 class="offcanvas-title text-white" id="profileMenuLabel">Profile Menu</h5>
+                        <h2 class="offcanvas-title text-white" id="profileMenuLabel">Profile Menu</h2>
                         <button type="button" class="btn-close-white" data-bs-dismiss="offcanvas"
                                 aria-label="Close"></button>
                     </div>
@@ -82,10 +82,26 @@
                 </div>
             <% } %>
             <div class="row">
-                <ul></ul>
+                <h2 class="text-white text-center mt-5">Top Elo Games</h2>
+                <h4 class="text-white text-center mb-3">to watch</h4>
+            </div>
+            <div class="row">
+                <ul class="list-group mt-3">
+                    <% for (let i = 0; i < games.length; i++) { %>
+                        <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                            <span>Elo Avg.: <span class="text-warning fw-bold"><%= games[i].average_elo_rating %></span></span>
+                            <button class="btn btn-primary" onclick="spectateGame(<%= games[i].id %>)">Spectate</button>
+                            <div class="d-flex align-items-center">
+                                <span class="me-3 text-warning fw-bold"><%= games[i].player1_username %></span>
+                                <span> vs </span>
+                                <span class="ms-3 text-warning fw-bold"><%= games[i].player2_username %></span>
+                            </div>
+                        </li>
+                    <% } %>
+                </ul>
             </div>
         </div>
-        <div class="col-md-8 mx-auto mt-4">
+        <div class="col-md-6 mx-auto mt-4">
             <div class="row">
                 <h1 class="display-2 text-white text-center mb-4">DeChess</h1>
             </div>
@@ -100,7 +116,59 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-2"></div>
+        <div class="col-md-3">
+            <div class="row text-end justify-content-end">
+                <div class="col-4">
+                    <button class="btn btn-primary mt-4" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#menu" aria-controls="menu">
+                        <img class="m-1" src="/img/menu.png" alt="User Image" width="32" height="32">
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-5 h-75">
+                <h2 class="text-white text-center">Moves</h2>
+                <div class="bg-dark text-white p-3 border border-white rounded h-100 overflow-auto" id="moves"></div>
+            </div>
+            <div class="offcanvas offcanvas-end bg-dark border-start" tabindex="-1" id="menu"
+                 aria-labelledby="menuLabel" data-bs-backdrop="false">
+                <div class="offcanvas-header bg-dark">
+                    <h2 class="offcanvas-title text-white" id="menuLabel">Menu</h2>
+                    <button type="button" class="btn-close-white" data-bs-dismiss="offcanvas"
+                            aria-label="Close">
+                    </button>
+                </div>
+                <div class="offcanvas-body bg-dark">
+                    <h5 class="text-white">General</h5>
+                    <ul class="list-group bg-dark">
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Play</a></li>
+                        <li class="list-group-item bg-dark"><a href="#"
+                                                               class="btn btn-dark w-100 text-start">Learn</a>
+                        </li>
+                        <li class="list-group-item bg-dark"><a href="#"
+                                                               class="btn btn-dark w-100 text-start">Challenges</a>
+                        </li>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Ranking/Leaderboard</a>
+                        </li>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Tournaments</a>
+                        </li>
+                    </ul>
+                    <h5 class="text-white mt-4">Settings</h5>
+                    <ul class="list-group bg-dark">
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Account Settings</a></li>
+                        <li class="list-group-item bg-dark"><a href="#"
+                                                               class="btn btn-dark w-100 text-start">Notification Preferences</a>
+                        </li>
+                        <li class="list-group-item bg-dark"><a href="#"
+                                                               class="btn btn-dark w-100 text-start">Appearance/Theme Options</a>
+                        </li>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Sound</a>
+                        </li>
+                        <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Privacy and Data Settings</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
@@ -248,7 +316,7 @@
 
     function queueUp() {
         document.querySelector('.HomeScreenButton').style.display = 'none';
-        document.querySelector('#MiddleAbsoluteWindow').innerHTML = '<h2 class="text-white">Looking for Opponent...</h2>';
+        document.querySelector('#MiddleAbsoluteWindow').innerHTML = '<h2 class="text-white bg-dark border border-white rounded p-2 px-4 d-inline-block">Looking for Opponent...</h2>';
         fetch('/queueup', {
             method: 'POST',
             headers: {
