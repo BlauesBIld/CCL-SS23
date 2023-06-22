@@ -51,10 +51,21 @@ let deleteUser = (id) => new Promise((resolve, reject) => {
     });
 });
 
+let getUserByUsername = (username) => new Promise((resolve, reject) => {
+    db.query('SELECT * FROM users WHERE username = ?', [username], function (err, result, fields) {
+        if (err) {
+            reject(err)
+        } else {
+            resolve(result[0]);
+        }
+    });
+});
+
 
 module.exports = {
     getUsers,
     getUserById,
     createUser,
-    deleteUser
+    deleteUser,
+    getUserByUsername
 }

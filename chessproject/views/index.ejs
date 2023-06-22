@@ -90,7 +90,9 @@
                     <% for (let i = 0; i < games.length; i++) { %>
                         <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
                             <span>Elo Avg.: <span class="text-warning fw-bold"><%= games[i].average_elo_rating %></span></span>
-                            <button class="btn btn-primary" onclick="spectateGame(<%= games[i].id %>)">Spectate</button>
+                            <button class="btn btn-primary"
+                                    onclick="spectateGame(<%= games[i].id %>, '<%= loggedInUser.username %>')">Spectate
+                            </button>
                             <div class="d-flex align-items-center">
                                 <span class="me-3 text-warning fw-bold"><%= games[i].player1_username %></span>
                                 <span> vs </span>
@@ -103,7 +105,9 @@
         </div>
         <div class="col-md-6 mx-auto mt-4">
             <div class="row">
-                <h1 class="display-2 text-white text-center mb-4">DeChess</h1>
+                <a href="/" class="text-decoration-none">
+                    <h1 class="display-2 text-white text-center mb-4">DeChess</h1>
+                </a>
             </div>
             <div class="row">
                 <div id="board" class="mx-auto"></div>
@@ -184,6 +188,20 @@
     let blackSquareGrey = '#696969'
     let playerColor = '';
     let opponentName = '';
+    let spectatingGameId = '';
+
+    function spectateGame(gameId, username) {
+        fetch('/spectate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                gameId: gameId
+            })
+        });
+    }
 
     function removeGreySquares() {
         $('#myBoard .square-55d63').css('background', '')
@@ -202,7 +220,7 @@
 
     function onDragStart(source, piece) {
         // Do not pick up pieces if the game is over
-        if (game.game_over()) return false;
+        if (game.game_over() || opponentName === '') return false;
 
         // Check if it is the player's turn
         if ((game.turn() === 'w' && playerColor !== 'white') ||
@@ -236,6 +254,7 @@
                 move: move,
                 opponent: opponentName
             }));
+            checkIfGameIsOverAndDisplayIt();
         }
     }
 
@@ -306,13 +325,37 @@
         movesList.appendChild(moveItem);
     }
 
+    function checkIfGameIsOverAndDisplayIt() {
+        if (game.game_over()) {
+            let result = getResult();
+
+            opponentName = '';
+            document.querySelector('#opponentDiv').remove();
+            let resultDiv = document.createElement('div');
+            resultDiv.classList.add('position-absolute', 'top-50', 'start-50', 'translate-middle', 'text-center', 'pb-3');
+            resultDiv.innerHTML = `<h2 class="text-white bg-dark border border-white rounded p-2 d-inline-block">${result}</h2>`;
+            document.querySelector('#MiddleAbsoluteWindow').appendChild(resultDiv);
+        }
+    }
+
+    function addStaticNewMoveToTheList(move_san) {
+        // Add new move to moves list
+        let movesList = document.querySelector('#moves');
+        let moveItem = document.createElement('div');
+        moveItem.classList.add('py-1', 'px-2', 'border-bottom', 'text-center');
+        moveItem.textContent = move_san;
+        movesList.appendChild(moveItem);
+    }
+
     ws.onmessage = function (event) {
         console.log(`${event.data}`);
         let message = JSON.parse(event.data);
         if (message.type === 'startGame') {
+            spectatingGameId = '';
             console.log('Starting game...');
             playerColor = message.color;
             opponentName = message.opponent;
+            let opponentElo = message.eloRating;
             console.log('Player color:', playerColor);
 
             board.position('start');
@@ -321,6 +364,20 @@
             }
 
             document.querySelector('#MiddleAbsoluteWindow').innerHTML = '';
+
+            let opponentDiv = document.createElement('div');
+            opponentDiv.classList.add('text-center', 'text-white', 'd-inline-block');
+            opponentDiv.innerHTML = `
+                <div id="opponentDiv" class="d-flex justify-content-center align-items-start">
+                    <div class="me-3 d-flex flex-column justify-content-center">
+                        <h4 class="align-self-center">Opponent: <span class="text-warning">${opponentName}</span></h4>
+                        <p class="align-self-center">Elo rating: <span class="text-warning">${opponentElo}</span></p>
+                    </div>
+                    <button class="btn btn-lg btn-danger fs-4 mt-1" onclick="surrender()">Surrender</button>
+                </div>
+            `;
+
+            document.querySelector('#MiddleAbsoluteWindow').parentElement.appendChild(opponentDiv);
         } else if (message.type === 'move') {
             let newFen = message.newBoard;
             console.log('Received new FEN string:', newFen);
@@ -328,8 +385,74 @@
             board.position(game.fen());
 
             addNewMoveToTheList(message.move);
+
+            checkIfGameIsOverAndDisplayIt();
+        } else if (message.type === 'gameOver') {
+            console.log('Game over. Winner:', message.winnerUsername);
+            opponentName = '';
+            document.querySelector('#opponentDiv').remove();
+            let resultDiv = document.createElement('div');
+            resultDiv.classList.add('position-absolute', 'top-50', 'start-50', 'translate-middle', 'text-center', 'pb-3');
+            resultDiv.innerHTML = `<h2 class="text-white bg-dark border border-white rounded p-2 d-inline-block">${message.winner} wins!</h2>`;
+            document.querySelector('#MiddleAbsoluteWindow').appendChild(resultDiv);
+        } else if (message.type === 'joinAsSpectator') {
+            console.log('Joining as spectator...');
+            spectatingGameId = message.gameId;
+            let player1Username = message.player1Username;
+            let player2Username = message.player2Username;
+            let player1Elo = message.player1Elo;
+            let player2Elo = message.player2Elo;
+
+            let movesList = document.querySelector('#moves');
+            let moves = message.moves;
+            movesList.innerHTML = '';
+            for (let i = 0; i < moves.length; i++) {
+                addStaticNewMoveToTheList(moves[i].move_san);
+            }
+
+            let gameFen = message.gameFen;
+            board.position(gameFen);
+
+            document.querySelector('#MiddleAbsoluteWindow').innerHTML = '';
+
+            let opponentDiv = document.createElement('div');
+            opponentDiv.classList.add('text-center', 'text-white', 'd-inline-block');
+            opponentDiv.innerHTML = `
+                <div id="opponentDiv" class="d-flex justify-content-center align-items-start">
+                    <div class="me-3 d-flex flex-column justify-content-center">
+                        <h4 class="align-self-center">${player1Elo} <span class="text-warning">${player1Username}</span> vs <span class="text-warning">${player2Username}</span> ${player2Elo}</h4>
+                    </div>
+                </div>
+            `;
+            document.querySelector('#MiddleAbsoluteWindow').parentElement.appendChild(opponentDiv);
+        } else if (message.type === 'specMove'){
+            let newFen = message.newBoard;
+            console.log('Received new FEN string:', newFen);
+            game.load(newFen);
+            board.position(game.fen());
+
+            addNewMoveToTheList(message.move);
+
+            checkIfGameIsOverAndDisplayIt();
         }
     };
+
+    function surrender() {
+        ws.send(JSON.stringify({
+            type: 'surrender',
+            winner: opponentName
+        }));
+    }
+
+    function getResult() {
+        if (game.in_checkmate()) {
+            return game.turn() === 'w' ? 'Black won!' : 'White won!';
+        } else if (game.in_draw()) {
+            return 'Draw!';
+        } else {
+            return null;
+        }
+    }
 
     function queueUp() {
         document.querySelector('.HomeScreenButton').style.display = 'none';

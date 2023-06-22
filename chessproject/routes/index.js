@@ -4,6 +4,8 @@ const userController = require("../controller/userController");
 const gameController = require("../controller/gameController");
 const userModel = require("../model/userModel");
 const authenticationService = require("../service/authentication");
+const spectatorController = require("../controller/spectatorsController");
+const ws = require("../service/websocket");
 
 router.get('/', authenticationService.authenticateJWTAndContinueWithGuest, (req, res) => {
     gameController.getTopTenOngoingAverageEloRatingGames().then((games) => {
@@ -41,6 +43,12 @@ router.get('/logout', (req, res, next) => {
 
 router.post('/queueup', (req, res) => {
     userController.queueUp(req, res);
+});
+
+router.post('/spectate', (req, res) => {
+    let username = req.body.username;
+    let gameId = req.body.gameId;
+    ws.addSpectatorToGame(gameId, username);
 });
 
 module.exports = router;

@@ -180,7 +180,7 @@ function findUserNameInUserQueueWithSimilarRating(player1username, eloRating) {
             foundUsername = userQueue[i];
         }
     }
-    if(foundUsername) {
+    if (foundUsername) {
         console.log("found user in queue: " + foundUsername.username)
     }
     return foundUsername;
@@ -197,21 +197,32 @@ function queueUp(req, res) {
         }
     } else if (req.body.userId !== -1) {
         userModel.getUserById(req.body.userId).then((user) => {
-            chessDataModel.getChessDataByUserId(req.body.userId).then((chessData) => {
-                let newQueueEntry = {
-                    username: user.username,
-                    eloRating: chessData.elo
-                }
-                userQueue.push(newQueueEntry);
-                console.log(newQueueEntry);
+            if (userQueue.find((queueEntry) => queueEntry.username === user.username)) {
+                console.log("user is already in queue");
+            } else {
+                chessDataModel.getChessDataByUserId(req.body.userId).then((chessData) => {
+                    gameModel.getGameByPlayerUsername(user.username).then((game) => {
+                        if (game) {
+                            winner = game.player1Username === user.username ? game.player2Username : game.player1Username;
+                            gameModel.endGame(game.id, winner);
+                        }
+                    });
 
-                let foundUsername;
-                if ((foundUsername = findUserNameInUserQueueWithSimilarRating(req.body.username, chessData.elo))) {
-                    let player1 = foundUsername;
-                    let player2 = {username: user.username, eloRating: chessData.elo};
-                    startUserGame(player1, player2);
-                }
-            });
+                    let newQueueEntry = {
+                        username: user.username,
+                        eloRating: chessData.elo
+                    }
+                    userQueue.push(newQueueEntry);
+                    console.log(newQueueEntry);
+
+                    let foundUsername;
+                    if ((foundUsername = findUserNameInUserQueueWithSimilarRating(req.body.username, chessData.elo))) {
+                        let player1 = foundUsername;
+                        let player2 = {username: user.username, eloRating: chessData.elo};
+                        startUserGame(player1, player2);
+                    }
+                });
+            }
         });
     } else {
         res.sendStatus(500);

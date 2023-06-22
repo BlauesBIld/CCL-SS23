@@ -47,7 +47,38 @@ let getGameByPlayerUsername = (username) => new Promise((resolve, reject) => {
 });
 
 let endGame = (id, winnerUsername) => new Promise((resolve, reject) => {
-    db.query("UPDATE games SET status = ?, winner_username = ? WHERE id = ?", ["concluded", winnerUsername, id], function (err, result, fields) {
+    if (!winnerUsername) {
+        db.query("UPDATE games SET status = ? WHERE id = ?", ["concluded", id], function (err, result, fields) {
+            if (err) reject(err);
+            resolve(result);
+        });
+    } else {
+        db.query("UPDATE games SET status = ?, winner_username = ? WHERE id = ?", ["concluded", winnerUsername, id], function (err, result, fields) {
+            if (err) reject(err);
+            resolve(result);
+        });
+    }
+});
+
+let updateLastFenForGameId = (id, lastFen) => new Promise((resolve, reject) => {
+    db.query("UPDATE games SET last_fen = ? WHERE id = ?", [lastFen, id], function (err, result, fields) {
+        if (err) reject(err);
+        resolve(result);
+    });
+});
+
+let getOngoingGameByPlayerUsername = (username) => new Promise((resolve, reject) => {
+    db.query('SELECT * FROM games WHERE (player1_username = ? OR player2_username = ?) AND status = ?', [username, username, "ongoing"], function (err, result, fields) {
+        if (err) {
+            reject(err)
+        } else {
+            resolve(result[0]);
+        }
+    });
+});
+
+let setAllOngoingGamesToConcluded = () => new Promise((resolve, reject) => {
+    db.query("UPDATE games SET status = ? WHERE status = ?", ["concluded", "ongoing"], function (err, result, fields) {
         if (err) reject(err);
         resolve(result);
     });
@@ -59,5 +90,8 @@ module.exports = {
     createGame,
     getTopTenOngoingAverageEloRatingGames,
     getGameByPlayerUsername,
-    endGame
+    getOngoingGameByPlayerUsername,
+    endGame,
+    setAllOngoingGamesToConcluded,
+    updateLastFenForGameId
 }

@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS chat_messages;
 DROP TABLE IF EXISTS chess_data;
 DROP TABLE IF EXISTS games;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS spectators;
 
 CREATE TABLE users (
   id INT PRIMARY KEY AUTO_INCREMENT,
@@ -18,6 +19,7 @@ CREATE TABLE games (
   player2_username VARCHAR(50) NOT NULL,
   status ENUM('ongoing', 'completed') NOT NULL DEFAULT 'ongoing',
   winner_username VARCHAR(50),
+  lastFen VARCHAR(100) NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (player1_username) REFERENCES users(username),
   FOREIGN KEY (player2_username) REFERENCES users(username),
@@ -27,11 +29,11 @@ CREATE TABLE games (
 CREATE TABLE moves (
   id INT PRIMARY KEY AUTO_INCREMENT,
   game_id INT NOT NULL,
-  player_id INT NOT NULL,
+  player_username VARCHAR(50) NOT NULL,
   move VARCHAR(10) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (game_id) REFERENCES games(id),
-  FOREIGN KEY (player_id) REFERENCES users(id)
+  FOREIGN KEY (player_username) REFERENCES users(username)
 );
 
 CREATE TABLE chat_messages (
@@ -56,4 +58,13 @@ CREATE TABLE chess_data (
   draws INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE spectators (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  game_id INT NOT NULL,
+  username VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (game_id) REFERENCES games(id),
+  FOREIGN KEY (username) REFERENCES users(username)
 );
