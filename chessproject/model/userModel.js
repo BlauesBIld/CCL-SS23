@@ -37,11 +37,10 @@ function createUserInDatabase(sql, values, reject, resolve, userData) {
         if (err) {
             reject(err)
         }
-        if (result) {
-            chessDataModel.createChessDataForNewUser(result.insertId);
-        }
-        resolve(result);
-    });
+        getUserById(result.insertId).then((user) => {
+            resolve(user);
+        });
+    })
 }
 
 let deleteUser = (id) => new Promise((resolve, reject) => {

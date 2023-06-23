@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Statistics</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+</head>
+<body class="bg-dark text-white">
+<div class="container mt-5">
+    <div class="row mb-5">
+        <a href="/" class="text-decoration-none">
+            <h1 class="display-2 text-white text-center mb-4">DeChess</h1>
+        </a>
+    </div>
+    <h1 class="text-center mb-4">Chess Statistics for <span class="text-warning font-weight-bold"><%= user.username %></span></h1>
+    <h2 class="text-center mb-5">Elo Rating: <span class="text-warning font-weight-bold"><%= stats.elo  %></span></h2>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6 text-center">
+            <ul class="list-group">
+                <li class="list-group-item bg-secondary text-white">Games played: <%= stats.games_played %></li>
+                <li class="list-group-item bg-secondary text-white">Win rate: <%= ((stats.wins / stats.games_played) * 100).toFixed(2) %>%</li>
+                <li class="list-group-item bg-secondary text-white">Draw rate: <%= ((stats.draws / stats.games_played) * 100).toFixed(2) %>%</li>
+                <li class="list-group-item bg-secondary text-white">Lose rate: <%= ((stats.losses / stats.games_played) * 100).toFixed(2) %>%</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-3"></div>
+        <div class="col-md-6 text-center">
+            <ul class="list-group">
+                <li class="list-group-item bg-secondary text-white">Wins: <%= stats.wins %></li>
+                <li class="list-group-item bg-secondary text-white">Losses: <%= stats.losses %></li>
+                <li class="list-group-item bg-secondary text-white">Draws: <%= stats.draws %></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>

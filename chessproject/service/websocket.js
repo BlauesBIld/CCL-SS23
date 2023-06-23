@@ -30,8 +30,10 @@ wss.on('connection', (ws) => {
             let gameFen = getFenWithWhiteSideDown(JSON.parse(message).newBoard);
             createMoveInDatabase(JSON.parse(message).opponent, JSON.parse(message).move);
             gameModel.getOngoingGameByPlayerUsername(JSON.parse(message).opponent).then((game) => {
-                gameModel.updateLastFenForGameId(game.id, gameFen);
-                sendMoveToAllSpectatorsOfGame(game.id, gameFen, JSON.parse(message).move);
+                if (game) {
+                    gameModel.updateLastFenForGameId(game.id, gameFen);
+                    sendMoveToAllSpectatorsOfGame(game.id, gameFen, JSON.parse(message).move);
+                }
             });
 
             // Check if the game is over and determine the winner
@@ -41,26 +43,32 @@ wss.on('connection', (ws) => {
             if (winner !== null) {
                 console.log(`Game over. Winner: ${winner}`);
                 gameModel.getOngoingGameByPlayerUsername(JSON.parse(message).opponent).then((game) => {
-                    if (winner === 'White') {
-                        winnerUsername = game.player1_username;
-                        gameController.endGame(game.id, game.player1_username);
-                    } else if (winner === 'Black') {
-                        winnerUsername = game.player2_username;
-                        gameController.endGame(game.id, game.player2_username);
-                    } else {
-                        gameController.endGame(game.id, null);
+                    if(game) {
+                        if (winner === 'White') {
+                            winnerUsername = game.player1_username;
+                            gameController.endGame(game.id, game.player1_username);
+                        } else if (winner === 'Black') {
+                            winnerUsername = game.player2_username;
+                            gameController.endGame(game.id, game.player2_username);
+                        } else {
+                            gameController.endGame(game.id, null);
+                        }
                     }
-
                     console.log(`Game over. Winner: ${winnerUsername}`);
                 });
             }
         } else if (JSON.parse(message).type === 'surrender') {
             console.log(`User ${JSON.parse(message).username} surrendered`);
             gameModel.getOngoingGameByPlayerUsername(JSON.parse(message).winner).then((game) => {
-                gameController.endGame(game.id, JSON.parse(message).winner).then((finishedGame) => {
-                    sendGameEnded(finishedGame.player1_username, finishedGame);
-                    sendGameEnded(finishedGame.player2_username, finishedGame);
-                });
+                if (game) {
+                    gameController.endGame(game.id, JSON.parse(message).winner).then((finishedGame) => {
+                        sendGameEnded(finishedGame.player1_username, finishedGame);
+                        sendGameEnded(finishedGame.player2_username, finishedGame);
+                    });
+                } else {
+                    sendGameEnded(JSON.parse(message).winner, null, JSON.parse(message).winnerColor);
+                    sendGameEnded(JSON.parse(message).loser, null, JSON.parse(message).winnerColor);
+                }
             });
 
         } else {
@@ -134,16 +142,24 @@ function flipFen(fen) {
     return [flippedRows.join('/'), turn, castling, enPassant, halfMoves, fullMoves].join(' ');
 }
 
-function sendGameEnded(toUsername, game) {
+function sendGameEnded(toUsername, game, winnerColor = 'Draw') {
     console.log(`Sending game over to ${toUsername}`);
     if (connectedUsersWebSockets[toUsername] !== undefined) {
-        console.log("User found, sending packet");
-        console.log("decision: " + game.winner_username + " " + game.player1_username + " " + game.player2_username);
-        let winnerColor = game.winner_username === game.player1_username ? 'White' : 'Black';
-        connectedUsersWebSockets[toUsername].send(JSON.stringify({
-            type: 'gameOver',
-            winner: winnerColor
-        }));
+        if (!game) {
+            console.log("User found, sending packet");
+            connectedUsersWebSockets[toUsername].send(JSON.stringify({
+                type: 'gameOver',
+                winner: winnerColor
+            }));
+        } else {
+            console.log("User found, sending packet");
+            console.log("decision: " + game.winner_username + " " + game.player1_username + " " + game.player2_username);
+            winnerColor = game.winner_username === game.player1_username ? 'White' : 'Black';
+            connectedUsersWebSockets[toUsername].send(JSON.stringify({
+                type: 'gameOver',
+                winner: winnerColor
+            }));
+        }
     }
 }
 
@@ -171,8 +187,10 @@ function getFenWithWhiteSideDown(fen) {
 
 function createMoveInDatabase(opponent, move) {
     gameModel.getOngoingGameByPlayerUsername(opponent).then((game) => {
-        movesModel.createMove(game.id, opponent, move.san).then(() => {
-        });
+        if (game) {
+            movesModel.createMove(game.id, opponent, move.san).then(() => {
+            });
+        }
     });
 }
 

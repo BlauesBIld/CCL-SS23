@@ -66,17 +66,6 @@ function editUser(req, res, next) {
         });
 }
 
-function createUser(req, res, next) {
-    userModel.createUser(req.body)
-        .then((user) => {
-            res.render('user', {user, loggedInUser: req.user});
-        })
-        .catch((err) => {
-            res.status(500);
-            next(err);
-        });
-}
-
 function deleteUser(req, res, next) {
     userModel.deleteUser(parseInt(req.params.id))
         .then(() => {
@@ -98,6 +87,7 @@ function deleteUser(req, res, next) {
 function registerUser(req, res, next) {
     userModel.createUser(req.body)
         .then((user) => {
+            chessDataModel.createChessDataForNewUser(user.id);
             res.redirect('/login');
         })
         .catch((err) => {
@@ -114,11 +104,13 @@ function startGuestGame(player1Username, player2Username) {
         player1.send(JSON.stringify({
             type: "startGame",
             opponent: player2Username,
+            eloRating: 1200,
             color: "white"
         }));
         player2.send(JSON.stringify({
             type: "startGame",
             opponent: player1Username,
+            eloRating: 1200,
             color: "black"
         }));
     } else {
@@ -243,7 +235,6 @@ module.exports = {
     getUsers,
     getUserById,
     editUser,
-    createUser,
     deleteUser,
     registerUser,
     queueUp,

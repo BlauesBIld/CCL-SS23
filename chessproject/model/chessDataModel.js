@@ -60,7 +60,7 @@ let addConcludedGameToRecordsOfPlayers = (game) => new Promise(async (resolve, r
     });
 });
 
-updateChessDataForUser = (chessData) => new Promise(async (resolve, reject) => {
+let updateChessDataForUser = (chessData) => new Promise(async (resolve, reject) => {
     console.log("Updating chess data for user: " + chessData.user_id);
     console.log(JSON.stringify(chessData));
     db.query("UPDATE chess_data SET elo = ?, wins = ?, losses = ?, draws = ?, games_played = ? WHERE user_id = ?", [chessData.elo, chessData.wins, chessData.losses, chessData.draws, chessData.games_played, chessData.user_id], function (err, result, fields) {

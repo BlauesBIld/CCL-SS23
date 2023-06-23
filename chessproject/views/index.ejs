@@ -56,7 +56,7 @@
                             </li>
                             <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Achievements</a>
                             </li>
-                            <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Rating/Statistics</a>
+                            <li class="list-group-item bg-dark"><a href="/user/<%= loggedInUser.id%>" class="btn btn-dark w-100 text-start">Rating/Statistics</a>
                             </li>
                             <li class="list-group-item bg-dark"><a href="#" class="btn btn-dark w-100 text-start">Friends
                                     Requests</a></li>
@@ -129,9 +129,10 @@
                     </button>
                 </div>
             </div>
-            <div class="row mt-5 h-75">
+            <div class="row mt-5" style="height: 65vh;">
                 <h2 class="text-white text-center">Moves</h2>
-                <div class="bg-dark text-white p-3 border border-white rounded h-100 overflow-auto" id="moves"></div>
+                <div class="bg-dark text-white p-3 border border-white rounded overflow-auto" id="moves" style="height: 100%;">
+                </div>
             </div>
             <div class="offcanvas offcanvas-end bg-dark border-start" tabindex="-1" id="menu"
                  aria-labelledby="menuLabel" data-bs-backdrop="false">
@@ -373,7 +374,7 @@
                         <h4 class="align-self-center">Opponent: <span class="text-warning">${opponentName}</span></h4>
                         <p class="align-self-center">Elo rating: <span class="text-warning">${opponentElo}</span></p>
                     </div>
-                    <button class="btn btn-lg btn-danger fs-4 mt-1" onclick="surrender()">Surrender</button>
+                    <button class="btn btn-lg btn-danger fs-4 mt-1" onclick="surrender('<%= loggedInUser.username %>')">Surrender</button>
                 </div>
             `;
 
@@ -425,7 +426,7 @@
                 </div>
             `;
             document.querySelector('#MiddleAbsoluteWindow').parentElement.appendChild(opponentDiv);
-        } else if (message.type === 'specMove'){
+        } else if (message.type === 'specMove') {
             let newFen = message.newBoard;
             console.log('Received new FEN string:', newFen);
             game.load(newFen);
@@ -437,10 +438,12 @@
         }
     };
 
-    function surrender() {
+    function surrender(playername) {
         ws.send(JSON.stringify({
             type: 'surrender',
-            winner: opponentName
+            winner: opponentName,
+            loser: playername,
+            winnerColor: playerColor === 'white' ? 'Black' : 'White'
         }));
     }
 

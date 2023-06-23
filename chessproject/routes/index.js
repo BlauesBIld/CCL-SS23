@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require("../controller/userController");
 const gameController = require("../controller/gameController");
+const chessDataController = require("../controller/chessDataController");
 const userModel = require("../model/userModel");
 const authenticationService = require("../service/authentication");
 const spectatorController = require("../controller/spectatorsController");
@@ -50,5 +51,7 @@ router.post('/spectate', (req, res) => {
     let gameId = req.body.gameId;
     ws.addSpectatorToGame(gameId, username);
 });
+
+router.get('/user/:id', authenticationService.authenticateJWTAndForceToLogin, chessDataController.renderChessDataPage);
 
 module.exports = router;
